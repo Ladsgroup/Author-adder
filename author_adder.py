@@ -15,13 +15,13 @@ def get_authors_list():
     category = pywikibot.Category(site, 'Categoria:Autori')
     gen = pagegenerators.CategorizedPageGenerator(category)
     for page in pagegenerators.PreloadingGenerator(gen):
-        authors.append(page.title().replace('Autore:', ''))
+        authors.append(page.title(withNamespace=False))
     return authors
 
 
-def load_cahce():
+def load_cache():
     with codecs.open('authors.txt', 'r', 'utf-8') as f:
-        return json.loads(f.read())
+        return json.load(f)
 
 
 def write_cache(data=None):
@@ -29,7 +29,7 @@ def write_cache(data=None):
         print('Loading names of authors...')
         data = get_authors_list()
     with codecs.open('authors.txt', 'w', 'utf-8') as f:
-        f.write(json.dumps(data))
+        json.dump(data, f)
 
 
 class AuthorBot(Bot):
@@ -42,10 +42,10 @@ class AuthorBot(Bot):
             write_cache()
         self.authors = {}
         if not last_name:
-            for author in load_cahce():
+            for author in load_cache():
                 self.authors[author] = author
         else:
-            for author in load_cahce():
+            for author in load_cache():
                 temp = author.split(' (')[0]
                 temp = re.split(r' I(?:\W|I|V|X|M|$)', temp)[0]
                 temp = temp.split(' ')[-1]
